@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { getMemberProfileApi, putMemberProfileApi } from '@/services/profile'
-import type { ProfileDetail } from '@/types/member'
+import type { Gender, ProfileDetail } from '@/types/member'
 import { onLoad } from '@dcloudio/uni-app'
 import { useMemberStore } from '@/stores'
 const memberStore = useMemberStore()
@@ -48,9 +48,11 @@ const onAvatarChange = () => {
   })
 }
 const onSubmit = async () => {
+  const { nickname, gender, birthday } = profile.value
   const res = await putMemberProfileApi({
-    nickname: profile.value!.nickname,
-    gender: profile.value!.gender
+    nickname,
+    gender,
+    birthday
   })
   memberStore.profile!.nickname = res.result.nickname
   uni.showToast({
@@ -58,6 +60,12 @@ const onSubmit = async () => {
     title: '更新成功'
   })
   setTimeout(() => uni.navigateBack(), 500)
+}
+const optionGender: UniHelper.RadioGroupOnChange = (e) => {
+  profile.value.gender = e.detail.value as Gender
+}
+const optionBirthday: UniHelper.DatePickerOnChange = (e) => {
+  profile.value.birthday = e.detail.value
 }
 </script>
 
@@ -89,7 +97,7 @@ const onSubmit = async () => {
         </view>
         <view class="form-item">
           <text class="label">性别</text>
-          <radio-group>
+          <radio-group @change="optionGender">
             <label class="radio">
               <radio value="男" color="#27ba9b" :checked="profile?.gender === '男'" />
               男
@@ -108,6 +116,7 @@ const onSubmit = async () => {
             start="1900-01-01"
             :end="new Date()"
             :value="profile?.birthday"
+            @change="optionBirthday"
           >
             <view v-if="profile?.birthday">{{ profile?.birthday }}</view>
             <view class="placeholder" v-else>请选择日期</view>
