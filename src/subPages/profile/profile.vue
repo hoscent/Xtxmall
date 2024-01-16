@@ -52,7 +52,10 @@ const onSubmit = async () => {
   const res = await putMemberProfileApi({
     nickname,
     gender,
-    birthday
+    birthday,
+    provinceCode: fullLocationCode[0] || undefined,
+    cityCode: fullLocationCode[1] || undefined,
+    countyCode: fullLocationCode[2] || undefined
   })
   memberStore.profile!.nickname = res.result.nickname
   uni.showToast({
@@ -66,6 +69,11 @@ const optionGender: UniHelper.RadioGroupOnChange = (e) => {
 }
 const optionBirthday: UniHelper.DatePickerOnChange = (e) => {
   profile.value.birthday = e.detail.value
+}
+let fullLocationCode: [string, string, string] = ['', '', '']
+const onChangeCity: UniHelper.RegionPickerOnChange = (e) => {
+  fullLocationCode = e.detail.code!
+  profile.value.fullLocation = e.detail.value?.join(' ')
 }
 </script>
 
@@ -124,7 +132,12 @@ const optionBirthday: UniHelper.DatePickerOnChange = (e) => {
         </view>
         <view class="form-item">
           <text class="label">城市</text>
-          <picker class="picker" mode="region" :value="profile?.fullLocation?.split(' ')">
+          <picker
+            class="picker"
+            mode="region"
+            @change="onChangeCity"
+            :value="profile?.fullLocation?.split(' ')"
+          >
             <view v-if="profile?.fullLocation">{{ profile?.fullLocation }}</view>
             <view class="placeholder" v-else>请选择城市</view>
           </picker>
