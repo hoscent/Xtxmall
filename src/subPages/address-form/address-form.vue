@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { postMemberAddressApi } from '@/services/address'
+import { getMemberAddressByIdApi, postMemberAddressApi } from '@/services/address'
+import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
 // 表单数据
@@ -17,6 +18,16 @@ const query = defineProps<{
   id?: string
 }>()
 uni.setNavigationBarTitle({ title: query.id ? '修改地址' : '新建地址' })
+
+const getAddressDetail = async () => {
+  if (!query.id) return
+  // 获取地址详情
+  const res = await getMemberAddressByIdApi(query.id)
+  Object.assign(form.value, res.result)
+}
+onLoad(() => {
+  getAddressDetail()
+})
 
 const onRegionChange: UniHelper.RegionPickerOnChange = (e) => {
   const { code, value } = e.detail
