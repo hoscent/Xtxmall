@@ -22,3 +22,11 @@ export const getMemberAddressByIdApi = (id: string) => {
     url: `/member/address/${id}`
   })
 }
+
+export const putMemberAddressByIdApi = (id: string, data: AddressParams) => {
+  return http({
+    method: 'PUT',
+    url: `/member/address/${id}`,
+    data
+  })
+}
