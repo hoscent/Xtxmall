@@ -174,7 +174,7 @@ const localdata = ref({} as SkuPopupLocaldata)
     </view>
     <view class="buttons">
       <view class="addcart"> 加入购物车 </view>
-      <view class="buynow" @tap="isShowSku = true"> 立即购买 </view>
+      <view class="buynow"> 立即购买 </view>
     </view>
   </view>
   <uni-popup ref="popup" background-color="#fff">
