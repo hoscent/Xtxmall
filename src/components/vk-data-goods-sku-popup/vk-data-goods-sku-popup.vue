@@ -1,6 +1,7 @@
 <template>
   <view
     class="vk-data-goods-sku-popup"
+    :style="{ zIndex: zIndex }"
     catchtouchmove="true"
     :class="valueCom && complete ? 'show' : 'none'"
     @touchmove.stop.prevent="moveHandle"
@@ -380,6 +381,10 @@ export default {
 			Type: Boolean,
 			default: true
 		},
+		zIndex: {
+			Type: [Number,String],
+			default: 990
+		}
 	},
 	data() {
 		return {
