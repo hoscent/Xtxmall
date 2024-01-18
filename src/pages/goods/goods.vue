@@ -15,8 +15,6 @@ const { safeAreaInsets } = uni.getSystemInfoSync()
 const goodsDetail = ref<GoodsResult>()
 const getGoodsData = async () => {
   const res = await getGoodsByIdApi(query.id)
-  console.log(res.result)
-
   goodsDetail.value = res.result
   localdata.value = {
     _id: res.result.id,
