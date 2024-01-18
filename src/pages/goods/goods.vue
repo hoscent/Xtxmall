@@ -5,6 +5,7 @@ import type { GoodsResult } from '@/types/goods'
 import { getGoodsByIdApi } from '@/services/goods'
 import AddressPanel from './components/AddressPanel.vue'
 import ServicePanel from './components/ServicePanel.vue'
+import type { SkuPopupLocaldata } from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
 
 const query = defineProps<{
   id: string
@@ -14,7 +15,31 @@ const { safeAreaInsets } = uni.getSystemInfoSync()
 const goodsDetail = ref<GoodsResult>()
 const getGoodsData = async () => {
   const res = await getGoodsByIdApi(query.id)
+  console.log(res.result)
+
   goodsDetail.value = res.result
+  localdata.value = {
+    _id: res.result.id,
+    name: res.result.name,
+    goods_thumb: res.result.mainPictures[0],
+    spec_list: res.result.specs.map((v) => {
+      return {
+        name: v.name,
+        list: v.values
+      }
+    }),
+    sku_list: res.result.skus.map((v) => {
+      return {
+        _id: v.id,
+        goods_id: res.result.id,
+        goods_name: res.result.name,
+        image: v.picture,
+        price: v.price * 100,
+        stock: v.inventory,
+        sku_name_arr: v.specs.map((n) => n.valueName)
+      }
+    })
+  }
 }
 const currentIndex = ref(1)
 const onChange: UniHelper.SwiperOnChange = (e) => {
@@ -39,9 +64,12 @@ const openPopup = (name: typeof popupName.value) => {
 onLoad(() => {
   getGoodsData()
 })
+const isShowSku = ref(false)
+const localdata = ref({} as SkuPopupLocaldata)
 </script>
 
 <template>
+  <vk-data-goods-sku-popup v-model="isShowSku" :localdata="localdata" />
   <scroll-view scroll-y class="viewport">
     <!-- 基本信息 -->
     <view class="goods">
@@ -71,7 +99,7 @@ onLoad(() => {
 
       <!-- 操作面板 -->
       <view class="action">
-        <view class="item arrow">
+        <view class="item arrow" @tap="isShowSku = true">
           <text class="label">选择</text>
           <text class="text ellipsis"> 请选择商品规格 </text>
         </view>
@@ -146,7 +174,7 @@ onLoad(() => {
     </view>
     <view class="buttons">
       <view class="addcart"> 加入购物车 </view>
-      <view class="buynow"> 立即购买 </view>
+      <view class="buynow" @tap="isShowSku = true"> 立即购买 </view>
     </view>
   </view>
   <uni-popup ref="popup" background-color="#fff">
