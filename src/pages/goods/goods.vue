@@ -88,6 +88,7 @@ const onAddCart = async (e: SkuPopupEvent) => {
   uni.showToast({
     title: '添加成功'
   })
+  isShowSku.value = false
 }
 </script>
 
