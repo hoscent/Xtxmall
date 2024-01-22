@@ -23,3 +23,22 @@ export const deleteMemberCartApi = (data: { ids: string[] }) => {
     data
   })
 }
+
+export const putMemberCartBySkuIdApi = (
+  SkuId: string,
+  data: { selected?: boolean; count?: number }
+) => {
+  return http<CartItem[]>({
+    method: 'PUT',
+    url: `/member/cart/${SkuId}`,
+    data
+  })
+}
+
+export const putMemberCartCheckAllApi = (data: { selected: boolean }) => {
+  return http({
+    method: 'PUT',
+    url: '/member/cart/selected',
+    data
+  })
+}
