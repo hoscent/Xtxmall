@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import type { GoodsResult } from '@/types/goods'
 import { getGoodsByIdApi } from '@/services/goods'
 import AddressPanel from './components/AddressPanel.vue'
 import ServicePanel from './components/ServicePanel.vue'
-import type { SkuPopupLocaldata } from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
+import type {
+  SkuPopupEvent,
+  SkuPopupInstance,
+  SkuPopupLocaldata
+} from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
+import { postMemberCartApi } from '@/services/cart'
 
 const query = defineProps<{
   id: string
@@ -64,10 +69,39 @@ onLoad(() => {
 })
 const isShowSku = ref(false)
 const localdata = ref({} as SkuPopupLocaldata)
+enum SkuMode {
+  Both = 1,
+  Cart = 2,
+  Buy = 3
+}
+const skuMode = ref<SkuMode>(SkuMode.Both)
+const openSkuPopup = (mode: SkuMode) => {
+  isShowSku.value = true
+  skuMode.value = mode
+}
+const skuPopupRef = ref<SkuPopupInstance>()
+const selectComputer = computed(() => {
+  return skuPopupRef.value?.selectArr?.join(' ').trim() || '请选择商品规格'
+})
+const onAddCart = async (e: SkuPopupEvent) => {
+  await postMemberCartApi({ skuId: e._id, count: e.buy_num })
+  uni.showToast({
+    title: '添加成功'
+  })
+}
 </script>
 
 <template>
-  <vk-data-goods-sku-popup v-model="isShowSku" :localdata="localdata" />
+  <vk-data-goods-sku-popup
+    v-model="isShowSku"
+    :localdata="localdata"
+    :mode="skuMode"
+    add-cart-background-color="#ffa868"
+    buy-now-background-color="#27ba9b"
+    :actived-style="{ color: '#27ba9b', boderColor: '#27ba9b', backgroundColor: '#E9F8F5' }"
+    @add-cart="onAddCart"
+    ref="skuPopupRef"
+  />
   <scroll-view scroll-y class="viewport">
     <!-- 基本信息 -->
     <view class="goods">
@@ -97,9 +131,9 @@ const localdata = ref({} as SkuPopupLocaldata)
 
       <!-- 操作面板 -->
       <view class="action">
-        <view class="item arrow" @tap="isShowSku = true">
+        <view class="item arrow" @tap="openSkuPopup(SkuMode.Both)">
           <text class="label">选择</text>
-          <text class="text ellipsis"> 请选择商品规格 </text>
+          <text class="text ellipsis"> {{ selectComputer }}} </text>
         </view>
         <view class="item arrow" @tap="openPopup('address')">
           <text class="label">送至</text>
@@ -171,8 +205,8 @@ const localdata = ref({} as SkuPopupLocaldata)
       </navigator>
     </view>
     <view class="buttons">
-      <view class="addcart"> 加入购物车 </view>
-      <view class="buynow"> 立即购买 </view>
+      <view class="addcart" @tap="openSkuPopup(SkuMode.Cart)"> 加入购物车 </view>
+      <view class="buynow" @tap="openSkuPopup(SkuMode.Buy)"> 立即购买 </view>
     </view>
   </view>
   <uni-popup ref="popup" background-color="#fff">

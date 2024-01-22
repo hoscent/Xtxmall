@@ -57,7 +57,8 @@
       // "ignoreUploadUnusedFiles": false
     },
     "usingComponents": true,
-    "lazyCodeLoading": "requiredComponents"
+    "lazyCodeLoading": "requiredComponents",
+    "libVersion": "latest"
   },
   "mp-alipay": {
     "usingComponents": true

@@ -1,56 +1,56 @@
 <!-- 步进器 -->
 <template>
-  <view class="vk-data-input-number-box">
-    <view
-      class="u-icon-minus"
-      :class="{ 'u-icon-disabled': disabled || inputVal <= min }"
-      :style="{
-        background: bgColor,
-        height: inputHeight + 'rpx',
-        color: color,
-        fontSize: size + 'rpx',
-        minHeight: '1.4em'
-      }"
-      @click="emptyClick"
-      @touchstart.prevent="btnTouchStart('minus')"
-      @touchend.stop.prevent="clearTimer"
-    >
-      <view :style="'font-size:' + (Number(size) + 10) + 'rpx'" class="num-btn">－</view>
-    </view>
-    <input
-      v-model="inputVal"
-      :disabled="disabledInput || disabled"
-      :cursor-spacing="getCursorSpacing"
-      :class="{ 'u-input-disabled': disabled }"
-      class="u-number-input"
-      type="number"
-      :style="{
-        color: color,
-        fontSize: size + 'rpx',
-        background: bgColor,
-        height: inputHeight + 'rpx',
-        width: inputWidth + 'rpx'
-      }"
-      @blur="onBlur"
-      @click="showInput = true"
-    />
-    <view
-      class="u-icon-plus"
-      :class="{ 'u-icon-disabled': disabled || inputVal >= max }"
-      :style="{
-        background: bgColor,
-        height: inputHeight + 'rpx',
-        color: color,
-        fontSize: size + 'rpx',
-        minHeight: '1.4em'
-      }"
-      @click="emptyClick"
-      @touchstart.prevent="btnTouchStart('plus')"
-      @touchend.stop.prevent="clearTimer"
-    >
-      <view :style="'font-size:' + (Number(size) + 10) + 'rpx'" class="num-btn">＋</view>
-    </view>
-  </view>
+	<view class="vk-data-input-number-box">
+		<view
+			class="u-icon-minus"
+			:class="{ 'u-icon-disabled': disabled || inputVal <= min }"
+			:style="{
+				background: bgColor,
+				height: inputHeight + 'rpx',
+				color: color,
+				fontSize: size + 'rpx',
+				minHeight: '1.4em'
+			}"
+			@click="emptyClick"
+			@touchstart.prevent="btnTouchStart('minus')"
+			@touchend.stop.prevent="clearTimer"
+		>
+			<view :style="'font-size:' + (Number(size) + 10) + 'rpx'" class="num-btn">－</view>
+		</view>
+		<input
+			v-model="inputVal"
+			:disabled="disabledInput || disabled"
+			:cursor-spacing="getCursorSpacing"
+			:class="{ 'u-input-disabled': disabled }"
+			class="u-number-input"
+			type="number"
+			:style="{
+				color: color,
+				fontSize: size + 'rpx',
+				background: bgColor,
+				height: inputHeight + 'rpx',
+				width: inputWidth + 'rpx'
+			}"
+			@blur="onBlur"
+			@click="showInput=true"
+		/>
+		<view
+			class="u-icon-plus"
+			:class="{ 'u-icon-disabled': disabled || inputVal >= max }"
+			:style="{
+				background: bgColor,
+				height: inputHeight + 'rpx',
+				color: color,
+				fontSize: size + 'rpx',
+				minHeight: '1.4em'
+			}"
+			@click="emptyClick"
+			@touchstart.prevent="btnTouchStart('plus')"
+			@touchend.stop.prevent="clearTimer"
+		>
+			<view :style="'font-size:' + (Number(size) + 10) + 'rpx'" class="num-btn">＋</view>
+		</view>
+	</view>
 </template>
 <script>
 /* eslint-disable */
@@ -246,6 +246,10 @@ export default {
 			// #ifndef VUE3
 			return this.value;
 			// #endif
+
+			// #ifdef VUE3
+			return this.modelValue;
+			// #endif
 		},
 		getCursorSpacing() {
 			// 先将值转为px单位，再转为数值
@@ -255,7 +259,7 @@ export default {
 	methods: {
 		// 空点击事件，主要用于解决PC端H5由于无click事件导致触摸位置不准确的问题
 		emptyClick(){
-
+			
 		},
 		// 触摸事件开始
 		btnTouchStart(callback) {
