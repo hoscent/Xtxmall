@@ -134,7 +134,7 @@ const onAddCart = async (e: SkuPopupEvent) => {
       <view class="action">
         <view class="item arrow" @tap="openSkuPopup(SkuMode.Both)">
           <text class="label">选择</text>
-          <text class="text ellipsis"> {{ selectComputer }}} </text>
+          <text class="text ellipsis"> {{ selectComputer }} </text>
         </view>
         <view class="item arrow" @tap="openPopup('address')">
           <text class="label">送至</text>
