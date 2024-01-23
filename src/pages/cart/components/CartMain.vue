@@ -147,7 +147,7 @@ onLoad(() => {
         </navigator>
       </view>
       <!-- 吸底工具栏 -->
-      <view class="toolbar">
+      <view class="toolbar" :style="{ bottom: safeBottom }">
         <text class="all" :class="{ checked: isAllSelected }" @tap="selectedAll">全选</text>
         <text class="text">合计:</text>
         <text class="amount">{{ allPrice }}</text>
@@ -383,7 +383,6 @@ onLoad(() => {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: var(--window-bottom);
   z-index: 1;
 
   height: 100rpx;
