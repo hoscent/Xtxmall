@@ -43,7 +43,7 @@ const onDeleteAddress = (id: string) => {
               <navigator
                 class="edit"
                 hover-class="none"
-                :url="`/subPages/address-form/address-form?id=${item.id}`"
+                :url="`/pagesMember/address-form/address-form?id=${item.id}`"
               >
                 修改
               </navigator>
@@ -58,7 +58,9 @@ const onDeleteAddress = (id: string) => {
     </scroll-view>
     <!-- 添加按钮 -->
     <view class="add-btn">
-      <navigator hover-class="none" url="/subPages/address-form/address-form"> 新建地址 </navigator>
+      <navigator hover-class="none" url="/pagesMember/address-form/address-form">
+        新建地址
+      </navigator>
     </view>
   </view>
 </template>

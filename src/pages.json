@@ -102,7 +102,7 @@
 	},
 	"subPackages": [
 		{
-			"root": "subPages",
+			"root": "pagesMember",
 			"pages": [
 				{
 					"path": "settings/settings",
@@ -137,7 +137,7 @@
 		"pages/my/my": {
 			"network": "all",
 			"packages": [
-				"subPages"
+				"pagesMember"
 			]
 		}
 	}
