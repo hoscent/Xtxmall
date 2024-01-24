@@ -62,7 +62,7 @@ const goPayment = () => {
   if (selectGoosCount.value === 0) {
     return uni.showToast({ title: '请选择要购买的商品', icon: 'none' })
   }
-  uni.navigateTo({ url: '/pages/order/index' })
+  uni.navigateTo({ url: '/pagesOrder/create/create' })
 }
 const { guessRef, onScrollLower } = useGuessList()
 const safeBottom = ref<string>('0px')
