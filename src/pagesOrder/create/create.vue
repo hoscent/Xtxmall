@@ -3,6 +3,9 @@ import { getMemberOrderPreApi } from '@/services/order'
 import { computed, ref } from 'vue'
 import type { OrderPreResult } from '@/types/order'
 import { onLoad } from '@dcloudio/uni-app'
+import { useAddressStore } from '@/stores'
+import { getMemberOrderPreNowApi } from '@/services/order'
+const addressStore = useAddressStore()
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 // 订单备注
@@ -23,25 +26,48 @@ const onChangeDelivery: UniHelper.SelectorPickerOnChange = (ev) => {
 }
 const orderPre = ref<OrderPreResult>()
 const getOrderPreData = async () => {
+  if (query.skuId && query.count) {
+    const res = await getMemberOrderPreNowApi({
+      skuId: query.skuId,
+      count: query.count
+    })
+    orderPre.value = res.result
+    return
+  }
   const res = await getMemberOrderPreApi()
   orderPre.value = res.result
 }
 onLoad(() => {
   getOrderPreData()
 })
+const selectedAddress = computed(() => {
+  return (
+    addressStore.selectedAddress || orderPre.value?.userAddresses.find((item) => item.isDefault)
+  )
+})
+const query = defineProps<{
+  skuId?: string
+  count?: string
+}>()
 </script>
 
 <template>
-  <scroll-view scroll-y class="viewport">
+  <scroll-view
+    scroll-y
+    class="viewport"
+    :style="{paddingBottom: safeAreaInsets!.bottom + 138 + 'rpx'}"
+  >
     <!-- 收货地址 -->
     <navigator
-      v-if="false"
+      v-if="selectedAddress"
       class="shipment"
       hover-class="none"
       url="/pagesMember/address/address?from=order"
     >
-      <view class="user"> 张三 13333333333 </view>
-      <view class="address"> 广东省 广州市 天河区 黑马程序员3 </view>
+      <view class="user"> {{ selectedAddress.receiver }} {{ selectedAddress.contact }} </view>
+      <view class="address">
+        {{ selectedAddress.fullLocation }} {{ selectedAddress.address }}
+      </view>
       <text class="icon icon-right"></text>
     </navigator>
     <navigator
@@ -111,7 +137,7 @@ onLoad(() => {
   <!-- 吸底工具栏 -->
   <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
     <view class="total-pay symbol">
-      <text class="number">{{ orderPre?.summary.totalPrice.toFixed(2) }}</text>
+      <text class="number">{{ orderPre?.summary.totalPayPrice.toFixed(2) }}</text>
     </view>
     <view class="button" :class="{ disabled: true }"> 提交订单 </view>
   </view>

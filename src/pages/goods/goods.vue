@@ -90,6 +90,9 @@ const onAddCart = async (e: SkuPopupEvent) => {
   })
   isShowSku.value = false
 }
+const onBuyNow = (ev: SkuPopupEvent) => {
+  uni.navigateTo({ url: `/pagesOrder/create/create?skuId=${ev._id}&count=${ev.buy_num}` })
+}
 </script>
 
 <template>
@@ -101,6 +104,7 @@ const onAddCart = async (e: SkuPopupEvent) => {
     buy-now-background-color="#27ba9b"
     :actived-style="{ color: '#27ba9b', boderColor: '#27ba9b', backgroundColor: '#E9F8F5' }"
     @add-cart="onAddCart"
+    @buy-now="onBuyNow"
     ref="skuPopupRef"
   />
   <scroll-view scroll-y class="viewport">
