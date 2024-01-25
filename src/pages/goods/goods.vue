@@ -92,6 +92,7 @@ const onAddCart = async (e: SkuPopupEvent) => {
 }
 const onBuyNow = (ev: SkuPopupEvent) => {
   uni.navigateTo({ url: `/pagesOrder/create/create?skuId=${ev._id}&count=${ev.buy_num}` })
+  isShowSku.value = false
 }
 </script>
 
