@@ -4,7 +4,11 @@ import { computed, ref } from 'vue'
 import type { OrderPreResult } from '@/types/order'
 import { onLoad } from '@dcloudio/uni-app'
 import { useAddressStore } from '@/stores'
-import { getMemberOrderPreNowApi, postMemberOrderApi } from '@/services/order'
+import {
+  getMemberOrderPreNowApi,
+  postMemberOrderApi,
+  getMemberOrderRepurchaseByIdApi
+} from '@/services/order'
 const addressStore = useAddressStore()
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -24,6 +28,11 @@ const activeDelivery = computed(() => deliveryList.value[activeIndex.value])
 const onChangeDelivery: UniHelper.SelectorPickerOnChange = (ev) => {
   activeIndex.value = ev.detail.value
 }
+const query = defineProps<{
+  skuId?: string
+  count?: string
+  orderId?: string
+}>()
 const orderPre = ref<OrderPreResult>()
 const getOrderPreData = async () => {
   if (query.skuId && query.count) {
@@ -32,10 +41,13 @@ const getOrderPreData = async () => {
       count: query.count
     })
     orderPre.value = res.result
-    return
+  } else if (query.orderId) {
+    const res = await getMemberOrderRepurchaseByIdApi(query.orderId)
+    orderPre.value = res.result
+  } else {
+    const res = await getMemberOrderPreApi()
+    orderPre.value = res.result
   }
-  const res = await getMemberOrderPreApi()
-  orderPre.value = res.result
 }
 onLoad(() => {
   getOrderPreData()
@@ -45,10 +57,6 @@ const selectedAddress = computed(() => {
     addressStore.selectedAddress || orderPre.value?.userAddresses.find((item) => item.isDefault)
   )
 })
-const query = defineProps<{
-  skuId?: string
-  count?: string
-}>()
 const submitOrder = async () => {
   if (!selectedAddress.value?.id) {
     return uni.showToast({

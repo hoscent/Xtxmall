@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { useGuessList } from '@/composables'
-import { onReady } from '@dcloudio/uni-app'
+import { getMemberOrderByIdApi } from '@/services/order'
+import { onLoad, onReady } from '@dcloudio/uni-app'
+import type { OrderResult } from '@/types/order'
+import { OrderState, orderStateList } from '@/services/constants'
+import { getPayWxPayMiniPayApi, getPayMockApi } from '@/services/pay'
 import { ref } from 'vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -58,6 +62,26 @@ onReady(() => {
     endScrollOffset: 50
   })
 })
+const orderDetail = ref<OrderResult>()
+const getMemberOrderByIdData = async () => {
+  const res = await getMemberOrderByIdApi(query.id)
+  orderDetail.value = res.result
+}
+onLoad(() => {
+  getMemberOrderByIdData()
+})
+const onTimeup = () => {
+  orderDetail.value!.orderState = OrderState.YiQuXiao
+}
+const onOrderPay = async () => {
+  if (import.meta.env.DEV) {
+    await getPayMockApi({ orderId: query.id })
+  } else {
+    const res = await getPayWxPayMiniPayApi({ orderId: query.id })
+    wx.requestPayment(res.result)
+  }
+  uni.redirectTo({ url: '/pagesOrder/payment/payment' })
+}
 </script>
 
 <template>
@@ -75,23 +99,30 @@ onReady(() => {
     </view>
   </view>
   <scroll-view scroll-y class="viewport" id="scroller" @scrolltolower="onScrollLower">
-    <template v-if="true">
+    <template v-if="orderDetail">
       <!-- 订单状态 -->
       <view class="overview" :style="{ paddingTop: safeAreaInsets!.top + 20 + 'px' }">
         <!-- 待付款状态:展示去支付按钮和倒计时 -->
-        <template v-if="true">
+        <template v-if="orderDetail.orderState === OrderState.DaiFuKuan">
           <view class="status icon-clock">等待付款</view>
           <view class="tips">
             <text class="money">应付金额: ¥ 99.00</text>
             <text class="time">支付剩余</text>
-            00 时 29 分 59 秒
+            <uni-countdown
+              :second="orderDetail.countdown"
+              @timeup="onTimeup"
+              color="#fff"
+              splitor-color="#fff"
+              :show-colon="false"
+              :show-day="false"
+            ></uni-countdown>
           </view>
-          <view class="button">去支付</view>
+          <view class="button" @tap="onOrderPay">去支付</view>
         </template>
         <!-- 其他订单状态:展示再次购买按钮 -->
         <template v-else>
           <!-- 订单状态文字 -->
-          <view class="status"> 待付款 </view>
+          <view class="status"> {{ orderStateList[orderDetail.orderState].text }} </view>
           <view class="button-group">
             <navigator
               class="button"
@@ -126,25 +157,22 @@ onReady(() => {
         <view class="item">
           <navigator
             class="navigator"
-            v-for="item in 2"
-            :key="item"
-            :url="`/pages/goods/goods?id=${item}`"
+            v-for="item in orderDetail.skus"
+            :key="item.id"
+            :url="`/pages/goods/goods?id=${item.spuId}`"
             hover-class="none"
           >
-            <image
-              class="cover"
-              src="https://yanxuan-item.nosdn.127.net/c07edde1047fa1bd0b795bed136c2bb2.jpg"
-            ></image>
+            <image class="cover" :src="item.image"></image>
             <view class="meta">
-              <view class="name ellipsis">ins风小碎花泡泡袖衬110-160cm</view>
-              <view class="type">藏青小花， 130</view>
+              <view class="name ellipsis">{{ item.name }}</view>
+              <view class="type"> {{ item.attrsText }} </view>
               <view class="price">
                 <view class="actual">
                   <text class="symbol">¥</text>
-                  <text>99.00</text>
+                  <text> {{ item.curPrice }} </text>
                 </view>
               </view>
-              <view class="quantity">x1</view>
+              <view class="quantity">x{{ item.quantity }}</view>
             </view>
           </navigator>
           <!-- 待评价状态:展示按钮 -->
@@ -157,15 +185,15 @@ onReady(() => {
         <view class="total">
           <view class="row">
             <view class="text">商品总价: </view>
-            <view class="symbol">99.00</view>
+            <view class="symbol">{{ orderDetail.totalMoney.toFixed(2) }}</view>
           </view>
           <view class="row">
             <view class="text">运费: </view>
-            <view class="symbol">10.00</view>
+            <view class="symbol">{{ orderDetail.postFee.toFixed(2) }}</view>
           </view>
           <view class="row">
             <view class="text">应付金额: </view>
-            <view class="symbol primary">109.00</view>
+            <view class="symbol primary">{{ orderDetail.payMoney.toFixed(2) }}</view>
           </view>
         </view>
       </view>
@@ -188,8 +216,8 @@ onReady(() => {
       <view class="toolbar-height" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }"></view>
       <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
         <!-- 待付款状态:展示支付按钮 -->
-        <template v-if="true">
-          <view class="button primary"> 去支付 </view>
+        <template v-if="orderDetail.orderState === OrderState.DaiFuKuan">
+          <view class="button primary" @tap="onOrderPay"> 去支付 </view>
           <view class="button" @tap="popup?.open?.()"> 取消订单 </view>
         </template>
         <!-- 其他订单状态:按需展示按钮 -->
