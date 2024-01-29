@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useGuessList } from '@/composables'
-import { getMemberOrderByIdApi } from '@/services/order'
+import { getMemberOrderByIdApi, getMemberOrderConsignmentByIdApi } from '@/services/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
 import type { OrderResult } from '@/types/order'
 import { OrderState, orderStateList } from '@/services/constants'
@@ -82,6 +82,13 @@ const onOrderPay = async () => {
   }
   uni.redirectTo({ url: '/pagesOrder/payment/payment' })
 }
+const isDev = import.meta.env.DEV
+const onOrderSend = async () => {
+  if (!isDev) return
+  await getMemberOrderConsignmentByIdApi(query.id)
+  uni.showToast({ title: '发货成功' })
+  orderDetail.value!.orderState = OrderState.DaiShouHuo
+}
 </script>
 
 <template>
@@ -132,7 +139,13 @@ const onOrderPay = async () => {
               再次购买
             </navigator>
             <!-- 待发货状态：模拟发货,开发期间使用,用于修改订单状态为已发货 -->
-            <view v-if="false" class="button"> 模拟发货 </view>
+            <view
+              v-if="isDev && orderDetail.orderState == OrderState.DaiFaHuo"
+              class="button"
+              @tap="onOrderSend"
+            >
+              模拟发货
+            </view>
           </view>
         </template>
       </view>
