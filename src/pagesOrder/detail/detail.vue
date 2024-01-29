@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { useGuessList } from '@/composables'
-import { getMemberOrderByIdApi, getMemberOrderConsignmentByIdApi } from '@/services/order'
+import {
+  getMemberOrderByIdApi,
+  getMemberOrderConsignmentByIdApi,
+  putMemberOrderReceiptByIdApi,
+  getMemberOrderLogisticsByIdApi
+} from '@/services/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
-import type { OrderResult } from '@/types/order'
+import type { OrderResult, LogisticItem } from '@/types/order'
 import { OrderState, orderStateList } from '@/services/constants'
 import { getPayWxPayMiniPayApi, getPayMockApi } from '@/services/pay'
 import { ref } from 'vue'
@@ -66,10 +71,14 @@ const orderDetail = ref<OrderResult>()
 const getMemberOrderByIdData = async () => {
   const res = await getMemberOrderByIdApi(query.id)
   orderDetail.value = res.result
+  if (
+    [OrderState.DaiShouHuo, OrderState.DaiPingJia, OrderState.YiWanCheng].includes(
+      res.result!.orderState
+    )
+  ) {
+    getMemberOrderLogisticsData()
+  }
 }
-onLoad(() => {
-  getMemberOrderByIdData()
-})
 const onTimeup = () => {
   orderDetail.value!.orderState = OrderState.YiQuXiao
 }
@@ -89,6 +98,25 @@ const onOrderSend = async () => {
   uni.showToast({ title: '发货成功' })
   orderDetail.value!.orderState = OrderState.DaiShouHuo
 }
+const onOrderConfirm = () => {
+  uni.showModal({
+    content: '为保障您的权益，请收到货并确认无误后，再确认收货',
+    success: async (success) => {
+      if (success.confirm) {
+        const res = await putMemberOrderReceiptByIdApi(query.id)
+        orderDetail.value = res.result
+      }
+    }
+  })
+}
+const logisticList = ref<LogisticItem[]>()
+const getMemberOrderLogisticsData = async () => {
+  const res = await getMemberOrderLogisticsByIdApi(query.id)
+  logisticList.value = res.result.list
+}
+onLoad(() => {
+  getMemberOrderByIdData()
+})
 </script>
 
 <template>
@@ -150,18 +178,20 @@ const onOrderSend = async () => {
         </template>
       </view>
       <!-- 配送状态 -->
-      <view class="shipment">
+      <view v-if="logisticList?.length" class="shipment">
         <!-- 订单物流信息 -->
-        <view v-for="item in 1" :key="item" class="item">
+        <view v-for="item in logisticList" :key="item.id" class="item">
           <view class="message">
-            您已在广州市天河区黑马程序员完成取件，感谢使用菜鸟驿站，期待再次为您服务。
+            {{ item.text }}
           </view>
-          <view class="date"> 2023-04-14 13:14:20 </view>
+          <view class="date"> {{ item.time }} </view>
         </view>
         <!-- 用户收货地址 -->
         <view class="locate">
-          <view class="user"> 张三 13333333333 </view>
-          <view class="address"> 广东省 广州市 天河区 黑马程序员 </view>
+          <view class="user">
+            {{ orderDetail.receiverContact }} {{ orderDetail.receiverMobile }}
+          </view>
+          <view class="address"> {{ orderDetail.receiverAddress }} </view>
         </view>
       </view>
 
@@ -243,9 +273,17 @@ const onOrderSend = async () => {
             再次购买
           </navigator>
           <!-- 待收货状态: 展示确认收货 -->
-          <view class="button primary"> 确认收货 </view>
+          <view
+            v-if="orderDetail.orderState == OrderState.DaiShouHuo"
+            class="button primary"
+            @tap="onOrderConfirm"
+          >
+            确认收货
+          </view>
           <!-- 待评价状态: 展示去评价 -->
-          <view class="button"> 去评价 </view>
+          <view v-if="orderDetail.orderState == OrderState.DaiPingJia" class="button">
+            去评价
+          </view>
           <!-- 待评价/已完成/已取消 状态: 展示删除订单 -->
           <view class="button delete"> 删除订单 </view>
         </template>
