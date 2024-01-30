@@ -11,7 +11,10 @@ const orderTabs = ref([
   { orderState: 3, title: '待收货' },
   { orderState: 4, title: '待评价' }
 ])
-const activeTab = ref(0)
+const props = defineProps<{
+  type: string
+}>()
+const activeTab = ref(orderTabs.value.findIndex((item) => item.orderState === Number(props.type)))
 </script>
 
 <template>
