@@ -1,5 +1,7 @@
 import type {
   OrderCreateParams,
+  OrderListParams,
+  OrderListResult,
   OrderLogisticResult,
   OrderPreResult,
   OrderResult
@@ -90,6 +92,18 @@ export const getMemberOrderLogisticsByIdApi = (id: string) => {
 export const deleteMemberOrderApi = (data: { ids: string[] }) => {
   return http({
     method: 'DELETE',
+    url: `/member/order`,
+    data
+  })
+}
+
+/**
+ * 获取订单列表
+ * @param data orderState 订单状态
+ */
+export const getMemberOrderApi = (data: OrderListParams) => {
+  return http<OrderListResult>({
+    method: 'GET',
     url: `/member/order`,
     data
   })

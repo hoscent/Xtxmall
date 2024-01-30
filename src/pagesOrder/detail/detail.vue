@@ -12,7 +12,6 @@ import type { OrderResult, LogisticItem } from '@/types/order'
 import { OrderState, orderStateList } from '@/services/constants'
 import { getPayWxPayMiniPayApi, getPayMockApi } from '@/services/pay'
 import { ref } from 'vue'
-import { computed } from 'vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 // 猜你喜欢
@@ -91,7 +90,7 @@ const onOrderPay = async () => {
     const res = await getPayWxPayMiniPayApi({ orderId: query.id })
     wx.requestPayment(res.result)
   }
-  uni.redirectTo({ url: '/pagesOrder/payment/payment' })
+  uni.redirectTo({ url: '/pagesOrder/payment/payment?id=' + query.id })
 }
 const isDev = import.meta.env.DEV
 const onOrderSend = async () => {
