@@ -4,13 +4,15 @@ import {
   getMemberOrderByIdApi,
   getMemberOrderConsignmentByIdApi,
   putMemberOrderReceiptByIdApi,
-  getMemberOrderLogisticsByIdApi
+  getMemberOrderLogisticsByIdApi,
+  deleteMemberOrderApi
 } from '@/services/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
 import type { OrderResult, LogisticItem } from '@/types/order'
 import { OrderState, orderStateList } from '@/services/constants'
 import { getPayWxPayMiniPayApi, getPayMockApi } from '@/services/pay'
 import { ref } from 'vue'
+import { computed } from 'vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 // 猜你喜欢
@@ -114,6 +116,20 @@ const getMemberOrderLogisticsData = async () => {
   const res = await getMemberOrderLogisticsByIdApi(query.id)
   logisticList.value = res.result.list
 }
+const onOrdreDelete = () => {
+  uni.showModal({
+    content: '确定删除该订单吗？',
+    success: async (success) => {
+      if (success.confirm) {
+        await deleteMemberOrderApi({ ids: [query.id] })
+        uni.showToast({ title: '删除成功' })
+        setTimeout(() => {
+          uni.redirectTo({ url: '/pagesOrder/list/list' })
+        }, 500)
+      }
+    }
+  })
+}
 onLoad(() => {
   getMemberOrderByIdData()
 })
@@ -141,7 +157,7 @@ onLoad(() => {
         <template v-if="orderDetail.orderState === OrderState.DaiFuKuan">
           <view class="status icon-clock">等待付款</view>
           <view class="tips">
-            <text class="money">应付金额: ¥ 99.00</text>
+            <text class="money">应付金额: ¥ {{ orderDetail.payMoney }} </text>
             <text class="time">支付剩余</text>
             <uni-countdown
               :second="orderDetail.countdown"
@@ -248,7 +264,7 @@ onLoad(() => {
           <view class="item">
             订单编号: {{ query.id }} <text class="copy" @tap="onCopy(query.id)">复制</text>
           </view>
-          <view class="item">下单时间: 2023-04-14 13:14:20</view>
+          <view class="item">下单时间: {{ orderDetail.createTime }}</view>
         </view>
       </view>
 
@@ -285,7 +301,13 @@ onLoad(() => {
             去评价
           </view>
           <!-- 待评价/已完成/已取消 状态: 展示删除订单 -->
-          <view class="button delete"> 删除订单 </view>
+          <view
+            v-if="orderDetail.orderState >= OrderState.DaiPingJia"
+            class="button delete"
+            @tap="onOrdreDelete"
+          >
+            删除订单
+          </view>
         </template>
       </view>
     </template>
